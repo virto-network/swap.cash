@@ -1,0 +1,23 @@
+---
+title: Swap Cash
+layout: app.liquid
+data:
+  intro: |
+    Buy your favorite cryptocurrency from local providers
+---
+
+<p>{{ page.data.intro }}</p>
+
+<form action="#/offers/foo" method="GET">
+	<swap-cash from="fiat">
+		{% comment %} <input name="amount" type="number" required slot="amount"> {% endcomment %}
+		<select name="fiat" slot="fiat-select">
+			<option value="EUR">EUR</option>
+		</select>
+		<select name="crypto" slot="crypto-select">
+			<option value="AUSD">aUSD</option>
+			<option value="KSM">KSM</option>
+		</select>
+	</swap-cash>
+	<button class="action" type="submit">Search</button>
+</form>

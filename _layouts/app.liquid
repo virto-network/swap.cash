@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="{{ site.description }}">
+	<title>{{ page.title }}</title>
+
+	<meta name="theme-color" content="#3F3F8E">
+	<script type="module" src="js/swap-cash.js" async></script>
+	<style>{% include "app_base.css" %}</style>
+	<noscript><style></style></noscript>
+</head>
+
+<body>
+	<header>
+		{% include "swap_cash.svg" %}
+		<user-avatar></user-avatar>
+	</header>
+	<main>{{ page.content }}</main>
+</body>
+
+</html>
