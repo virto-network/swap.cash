@@ -4,13 +4,14 @@ layout: app.liquid
 data:
   intro: |
     Buy your favorite cryptocurrency from local providers
+  out_msg: aprox. to receive with an avg. rate of {}
 ---
 
 <p>{{ page.data.intro }}</p>
 
-<form action="#/offers/foo" method="GET">
-	<swap-cash from="fiat">
-		{% comment %} <input name="amount" type="number" required slot="amount"> {% endcomment %}
+<form action="#list-offers" method="GET">
+	<swap-cash from="fiat" rate="1.1" data-out-msg="{{ page.data.out_msg }}">
+		<input name="amount" type="number" required slot="amount">
 		<select name="fiat" slot="fiat-select">
 			<option value="EUR">EUR</option>
 		</select>

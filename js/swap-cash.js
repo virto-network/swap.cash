@@ -21,13 +21,19 @@ const template = html`
 	background: white;
 	border-radius: var(--input-rad);
 	box-sizing: border-box;
-	padding: 0.8rem 1rem 0.5rem;
+	padding: 12px calc(10px + 1vw) 5px;
 	margin: 3px 0;
 }
-.field>div { display: flex; }
+.field>div { display: flex; align-items: center; }
 
-#to, #from { flex: 3; }
-.message { flex: 2; }
+#to, #from { flex: 4; }
+.message {
+	flex: 2;
+	font-size: 0.8em;
+	margin-top: 4px;
+	min-height: 1rem;
+	line-height: 1rem;
+}
 
 #switch {
 	position: absolute;
@@ -63,6 +69,8 @@ const template = html`
 	box-sizing: border-box;
 	color: var(--color-alt2);
 	padding: .3rem 0 .3rem .5rem;
+	height: 100%;
+	max-height: 3rem;
 }
 </style>
 <!-- ----- end of styles ----- -->
@@ -97,13 +105,18 @@ const template = html`
 
 export class SwapCash extends HTMLElement {
 	static tag = 'swap-cash';
+	static observedAttributes = ['rate'];
 
 	#$amount;
+	#$output;
+	#$outMsg;
 	#amount = 0;
 	#rate = 1;
 
-	#onInput = ({target}) => {
-		console.log(target)
+	#onInput = ({originalTarget}) => {
+		let [from, to, rate] = originalTarget === this.#$output ?
+			 [this.#$output, this.#$amount, 1 / this.#rate] : [this.#$amount, this.#$output, this.#rate];
+		to.value = from.value ? (from.value * rate).toFixed(2) : '';
 	};
 
 	constructor() {
@@ -112,10 +125,21 @@ export class SwapCash extends HTMLElement {
 		$.append(template.content.cloneNode(true))
 
 		this.#$amount = $.querySelector('slot[name=amount]').assignedElements().at(0);
+		this.#$output = $.querySelector('#to input');
+		this.#$outMsg = $.querySelector('#to+.message');
 	}
 
 	connectedCallback() {
-		Object.assign(this.#$amount || {}, { min: 0, placeholder: '0.00' });
+		Object.assign(this.#$amount || {}, { min: 0, step: '.01', placeholder: '0.00' });
+		this.addEventListener('input', this.#onInput, false);
+	}
+
+	attributeChangedCallback(name, old, val) {
+		if (name === 'rate' && this.#rate !== val) {
+			this.#rate = +val;
+			this.#$outMsg.textContent = this.dataset.outMsg.replace('{}', this.#rate);
+			this.#onInput({originalTarget: this.#$amount})
+		}
 	}
 }
 customElements.define(SwapCash.tag, SwapCash);
