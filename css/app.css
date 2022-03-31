@@ -1,0 +1,43 @@
+user-avatar { height: var(--touch-area); width: var(--touch-area); margin-left: auto; }
+swap-cash { height: calc(var(--size) * 0.4); }
+
+form button {
+	border-radius: 12px;
+	border: none;
+	box-sizing: content-box;
+	color: var(--color-alt);
+	font-size: 1em;
+	margin: 1rem auto;
+	padding: 0.4rem 0;
+	width: 100%; height: var(--touch-area);
+}
+form button.action { background: var(--color-accent); }
+form button.action:active { box-shadow: 0 0 30px rgba(0,0,0,0.05) inset; }
+
+#select-offer { margin: 0; padding: 0; display: none; }
+#select-offer:target { display: block; }
+
+dialog#notice {
+	background-clip: padding-box;
+	background: var(--color-alt);
+	border-radius: 12px;
+	border: none;
+	box-shadow: 0 0 0 0.6rem rgba(255, 255, 255, 0.4);
+	box-sizing: border-box;
+	color: var(--color-pink);
+	align-items: center;
+	margin: 3rem 0;
+	min-height: calc(var(--size) * .3);
+	padding: calc(var(--size) * .05);
+	position: relative;
+	width: 100%;
+}
+dialog#notice[open] { display: flex; }
+dialog#notice button {
+	background: none;
+	border: none;
+	color: rgba(255, 255, 255, 0.4);
+	height: var(--touch-area); width: var(--touch-area);
+	margin: 0; padding: 0;
+	position: absolute; top: 0; right: 0;
+}

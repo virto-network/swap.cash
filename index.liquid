@@ -5,11 +5,12 @@ data:
   intro: |
     Buy your favorite cryptocurrency from local providers
   out_msg: aprox. to receive with an avg. rate of {}
+  notice: This demo is a work in progress
 ---
 
 <p>{{ page.data.intro }}</p>
 
-<form action="#list-offers" method="GET">
+<form action="#select-offer" method="GET">
 	<swap-cash from="fiat" rate="1.1" data-out-msg="{{ page.data.out_msg }}">
 		<input name="amount" type="number" required slot="amount">
 		<select name="fiat" slot="fiat-select">
@@ -20,5 +21,30 @@ data:
 			<option value="KSM">KSM</option>
 		</select>
 	</swap-cash>
+	<input type="hidden" name="f" value="Europe,Paypal">
 	<button class="action" type="submit">Search</button>
+
+	<dialog id="notice" open>
+		<button type="button" onclick="parentElement.close()">✕</button>
+		{{ page.data.notice }}
+	</dialog>
+	
 </form>
+
+<ol id="select-offer">
+	<swap-offer role="listitem" data-swaps="999" data-name="Ramen"
+			data-method="Paypal" data-where="DE" data-relative="+1.4%">
+		<output >0.9</output>
+	</swap-offer>
+	<swap-offer role="listitem" data-swaps="111" data-name="Milka"
+			data-method="SEPA" data-where="FR" data-relative="+2.0%">
+		<output >0.95</output>
+	</swap-offer>
+</ol>
+
+<dialog>
+	<form action="#confirm-order">
+	</form>
+</dialog>
+
+

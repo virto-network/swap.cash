@@ -1,17 +1,16 @@
 @font-face {
-  font-family: 'Major Mono Display';
+  font-family: 'DM Mono';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
   src: url(css/dm-mono.woff2) format('woff2');
 }
-
 :root {
-	--color-bg: #EEF2FF; --color-accent: #57FFC2;
-	--color-alt: #638FFE; --color-alt2: #3F3F8E;
-	--color-text: #70738F;
+	--color-bg: #EEF2FF; --color-fg: #FDFDFD;
+	--color-accent: #57FFC2; --color-alt: #3F3F8E;
+	--color-text: #70738F; --color-pink: #FFC8C8;
 	--touch-area: 2.3rem;
-	--size: calc(300px + 8vw);
+	--size: calc(300px + 6vw);
 }
 
 html, body { margin: 0; padding: 0; height: 100%; }
@@ -25,13 +24,14 @@ body {
 }
 
 header, main { margin: auto; width: var(--size); }
-main { flex: 4; }
+main { display: flex; flex-direction: column; flex: 4; }
 header {
 	align-items: center;
 	display: flex;
 	flex: 1;
 	padding: 1rem 0;
 }
+li { list-style: none; }
 
 :not(:defined) {
 	display: block;
@@ -39,19 +39,3 @@ header {
 	border-radius: 12px;
 }
 :not(:defined) * { display: none; }
-
-user-avatar { height: var(--touch-area); width: var(--touch-area); margin-left: auto; }
-swap-cash { height: calc(var(--size) * 0.4); }
-
-button {
-	border-radius: 12px;
-	border: none;
-	box-sizing: content-box;
-	color: var(--color-alt2);
-	font-size: 1em;
-	margin: 0.6rem auto;
-	padding: 0.4rem 0;
-	width: 100%; height: var(--touch-area);
-}
-button.action { background: var(--color-accent); }
-button.action:active { box-shadow: 0 0 30px rgba(0,0,0,0.05) inset; }
