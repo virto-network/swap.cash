@@ -11,7 +11,7 @@ data:
 <p>{{ page.data.intro }}</p>
 
 <form action="#select-offer" method="GET">
-	<swap-cash from="fiat" rate="1.1" data-out-msg="{{ page.data.out_msg }}">
+	<swap-cash to="crypto" rate="1.1" data-out-msg="{{ page.data.out_msg }}">
 		<input name="amount" type="number" required slot="amount">
 		<select name="fiat" slot="fiat-select">
 			<option value="EUR">EUR</option>

@@ -4,6 +4,12 @@ const html = (ss, ...parts) => p.parseFromString('<template>' + parts
 	.concat(ss[parts.length])
 + '</template>', 'text/html').querySelector('template');
 
+const entries = o => o[Symbol.iterator] ? [...o] : [...Object.entries(o)];
+const changes = (o, n) => {
+	let old = Object.fromEntries(entries(o));
+	return entries(n).filter(([k, v]) => Object.hasOwn(old, k) && old[k] != v)
+};
+
 const swapTpl = html`
 <style>
 :host {
@@ -106,16 +112,15 @@ export class SwapCash extends HTMLElement {
 	static tag = 'swap-cash';
 	static observedAttributes = ['rate'];
 
-	#$amount;
-	#$output;
-	#$outMsg;
-	#amount = 0;
-	#rate = 1;
+	#$ = {};
+	#state = { to: 'crypto', amount: 0, fiat: '', crypto: '', rate: 1 };
+	#raf = null;
 
-	#onInput = ({originalTarget}) => {
-		let [from, to, rate] = originalTarget === this.#$output ?
-			 [this.#$output, this.#$amount, 1 / this.#rate] : [this.#$amount, this.#$output, this.#rate];
-		to.value = from.value ? (from.value * rate).toFixed(2) : '';
+	#onInput = ({originalTarget: input}) => {
+		if (input instanceof HTMLInputElement) {
+			let amount = input === this.#$.output ? (+input.value / this.rate).toFixed(2) : input.value;
+			this.update({amount});
+		}
 	};
 
 	constructor() {
@@ -123,23 +128,72 @@ export class SwapCash extends HTMLElement {
 		let $ = this.attachShadow({ mode: 'closed', delagatesFocus: true});
 		$.append(swapTpl.content.cloneNode(true))
 
-		this.#$amount = $.querySelector('slot[name=amount]').assignedElements().at(0);
-		this.#$output = $.querySelector('#to input');
-		this.#$outMsg = $.querySelector('#to+.message');
+		this.#$.amount = $.querySelector('slot[name=amount]').assignedElements()[0];
+		this.#$.fiat   = $.querySelector('slot[name=fiat-select]').assignedElements()[0];
+		this.#$.crypto = $.querySelector('slot[name=crypto-select]').assignedElements()[0];
+		this.#$.output = $.querySelector('#to input');
+		this.#$.outMsg = $.querySelector('#to+.message');
 	}
 
 	connectedCallback() {
-		Object.assign(this.#$amount || {}, { min: 0, step: '.01', placeholder: '0.00' });
-		this.addEventListener('input', this.#onInput, false);
+		this.addEventListener('input', this.#onInput);
+		Object.assign(this.#$.amount || {}, { min: 0, step: '.01', placeholder: '0.00' });
+		this.amount = this.#$.amount.value;
+		this.fiat = this.#$.fiat.value;
+		this.crypto = this.#$.crypto.value;
+		// state from URL
+		this.update(new URL(location).searchParams);
 	}
 
 	attributeChangedCallback(name, old, val) {
-		if (name === 'rate' && this.#rate !== val) {
-			this.#rate = +val;
-			this.#$outMsg.textContent = this.dataset.outMsg.replace('{}', this.#rate);
-			this.#onInput({originalTarget: this.#$amount})
+		if (name == 'rate' && old !== val) {
+			this.rate = val;
+			this.update({rate: this.rate});
 		}
 	}
+
+	update(state = null) {
+		let updates = {};
+		if (state) {
+			for (let [name, val] of changes(this.#state, state)) {
+				if (name in this.#state) {
+					this[name] = val; // setter sanitizes input
+					updates[name] = this.#state[name];
+				}
+			}
+		} else {
+			updates = this.#state; // force udpate all properties
+		}
+		cancelAnimationFrame(this.#raf);
+		this.#raf = requestAnimationFrame(() => this.#updateDOM(entries(updates)));
+	}
+
+	#updateDOM(updates) {
+		for (let [name, val] of updates) switch (name) {
+			case 'amount': this.#$.amount.value = val; break;
+			case 'fiat': this.#$.fiat.value = val; break;
+			case 'crypto': this.#$.crypto.value = val; break;
+			case 'rate': this.#$.outMsg.textContent = this.#outMsg; break;
+		}
+		this.#$.output.value = this.#output;
+	}
+
+	get #output() { return (this.amount * this.rate).toFixed(2); }
+	get #outMsg() { return this.dataset.outMsg.replace('{}', this.rate) }
+
+	get rate() { return this.#state.rate; }
+	set rate(val) { this.#state.rate = +val; }
+
+	get amount() { return this.#state.amount; }
+	set amount(val) { this.#state.amount = Math.max(0, +val); }
+
+	get fiat() { return this.#state.fiat; }
+	set fiat(val) { this.#state.fiat = val.toUpperCase(); }
+
+	get crypto() { return this.#state.crypto; }
+	set crypto(val) { this.#state.crypto = val.toUpperCase(); }
+
+	toJSON() { return this.#state; }
 }
 customElements.define(SwapCash.tag, SwapCash);
 
