@@ -113,10 +113,12 @@ input::-webkit-inner-spin-button {
 export class Swap extends HTMLElement {
 	static tag = 'swap-x';
 	static observedAttributes = ['rate'];
+	static formAssociated = true;
 
 	#$$;
 	#$ = {};
 	#state = { amount: 0, from: '', to: '', rate: 1 };
+	#internals = null;
 	#raf = null;
 	#$src = null;
 
@@ -142,6 +144,8 @@ export class Swap extends HTMLElement {
 		this.#$.to = from; this.#$.from = to;
 		this.#$.from.setAttribute('slot', 'from-select');
 		this.#$.to.setAttribute('slot', 'to-select');
+		this.#internals?.setFormValue(this.value);
+
 		this.update({from: this.to, to: this.from, rate: 1 / this.rate});
 		this.#$.swBtn.firstElementChild
 			.animate([{ transform: 'rotateX(360deg)' }], 350);
@@ -159,6 +163,12 @@ export class Swap extends HTMLElement {
 		this.#$.output = this.#$$.querySelector('#to input');
 		this.#$.outMsg = this.#$$.querySelector('#to+.message');
 		this.#$.swBtn  = this.#$$.querySelector('#switch');
+
+		if ('ElementInternals' in window && 
+			'setFormValue' in window.ElementInternals.prototype) {
+			this.#internals = this.attachInternals();
+			this.#internals.setFormValue(this.value);
+		}
 	}
 
 	connectedCallback() {
@@ -230,6 +240,17 @@ export class Swap extends HTMLElement {
 
 	get to() { return this.#state.to; }
 	set to(val = '') { this.#state.to = val.toUpperCase(); }
+
+	// form associated element
+	get value() { return this.#$.from.name }
+	get form() { return this.#internals.form; }
+	get name() { return this.getAttribute('name'); }
+	get type() { return this.localName; }
+	get validity() { return this.#internals.validity; }
+	get validationMessage() { return this.#internals.validationMessage; }
+	get willValidate() { return this.#internals.willValidate; }
+	checkValidity() { return this.#internals.checkValidity(); }
+	reportValidity() { return this.#internals.reportValidity(); }
 
 	toJSON() { return this.#state; }
 }
