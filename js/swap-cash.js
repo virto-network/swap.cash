@@ -83,7 +83,7 @@ const swapTpl = html`
 <div class="field">
 	<div id="from">
 		<slot name="amount">
-			<input type="number" placeholder="0.00" min="0" step=".01" required />
+			<input type="number" placeholder="0.00" min="0" step=".001" required />
 		</slot>
 		<slot name="fiat-select">
 			<select><option disabled selected>---</option></select>
@@ -93,7 +93,7 @@ const swapTpl = html`
 </div>
 <div class="field">
 	<div id="to">
-		<input type="number" placeholder="0.00" min="0" step=".01" required />
+		<input type="number" placeholder="0.00" min="0" step=".001" required />
 		<slot name="crypto-select">
 			<select><option disabled selected>---</option></select>
 		</slot>
@@ -112,43 +112,45 @@ export class SwapCash extends HTMLElement {
 	static tag = 'swap-cash';
 	static observedAttributes = ['rate'];
 
+	#dom;
 	#$ = {};
 	#state = { to: 'crypto', amount: 0, fiat: '', crypto: '', rate: 1 };
 	#raf = null;
+	#$src = null;
 
 	#onInput = e => {
 		if (!e.isTrusted) return;
 		e.stopPropagation();
 
-		let input = e.originalTarget;
-		if (input instanceof HTMLInputElement) {
-			let amount = input === this.#$.output ? (+input.value / this.rate).toFixed(2) : input.value;
+		this.#$src = e.target;
+		if (this.#$src instanceof HTMLInputElement) {
+			let amount = this.#$src === this.#$.output ?
+				(this.#$src.value / this.rate).toFixed(3) : this.#$src.value;
 			this.update({amount});
 			requestAnimationFrame(() => {
 				this.#$.amount.dispatchEvent(new Event('input', { bubbles: true }));
 			});
 		} else {
-			this[input.name] = input.value;
-			let pair = { to: this.#to, fliat: this.fiat, crypto: this.crypto };
-			this.dispatchEvent(new CustomEvent('pair-change', { detail: pair }));
+			this[this.#$src.name] = this.#$src.value;
+			this.dispatchEvent(new CustomEvent('pair-change', { detail: this.pair }));
 		}
 	};
 
 	constructor() {
 		super();
-		let $ = this.attachShadow({ mode: 'closed', delagatesFocus: true});
-		$.append(swapTpl.content.cloneNode(true))
+		this.#dom = this.attachShadow({ mode: 'closed', delagatesFocus: true});
+		this.#dom.append(swapTpl.content.cloneNode(true))
 
-		this.#$.amount = $.querySelector('slot[name=amount]').assignedElements()[0];
-		this.#$.fiat   = $.querySelector('slot[name=fiat-select]').assignedElements()[0];
-		this.#$.crypto = $.querySelector('slot[name=crypto-select]').assignedElements()[0];
-		this.#$.output = $.querySelector('#to input');
-		this.#$.outMsg = $.querySelector('#to+.message');
+		this.#$.amount = this.#dom.querySelector('slot[name=amount]').assignedElements()[0];
+		this.#$.fiat   = this.#dom.querySelector('slot[name=fiat-select]').assignedElements()[0];
+		this.#$.crypto = this.#dom.querySelector('slot[name=crypto-select]').assignedElements()[0];
+		this.#$.output = this.#dom.querySelector('#to input');
+		this.#$.outMsg = this.#dom.querySelector('#to+.message');
 	}
 
 	connectedCallback() {
-		this.addEventListener('input', this.#onInput);
-		Object.assign(this.#$.amount || {}, { min: 0, step: '.01', placeholder: '0.00' });
+		this.#dom.addEventListener('input', this.#onInput);
+		Object.assign(this.#$.amount || {}, { min: 0.001, step: '.001', placeholder: '0.00' });
 		this.amount = this.#$.amount.value;
 		this.fiat = this.#$.fiat.value;
 		this.crypto = this.#$.crypto.value;
@@ -157,9 +159,7 @@ export class SwapCash extends HTMLElement {
 	}
 
 	attributeChangedCallback(name, old, val) {
-		if (name == 'rate' && old !== val) {
-			this.update({rate: val}, false);
-		}
+		if (name == 'rate' && old !== val) this.update({rate: val}, false);
 	}
 
 	update(state = null, canSkip = true) {
@@ -181,18 +181,29 @@ export class SwapCash extends HTMLElement {
 
 	#updateDOM(updates) {
 		for (let [name, val] of updates) switch (name) {
-			case 'amount': this.#$.amount.value = val; break;
-			case 'fiat': this.#$.fiat.value = val; break;
-			case 'crypto': this.#$.crypto.value = val; break;
+			case 'amount': val = val != 0 ? val: '';
+			case 'fiat':
+			case 'crypto':
+				let input = this.#$[name];
+				if (input != this.#$src) input.value = val;
+				break;
 			case 'rate': this.#$.outMsg.textContent = this.#outMsg; break;
 		}
-		let out = this.#output, $out = this.#$.output;
-		if (+out != $out.value) $out.value = out;
+		if (this.#$src != this.#$.output) {
+			let out = this.#output, $out = this.#$.output;
+			if (out != $out.value) $out.value = out != 0 ? out: '';
+		}
+		this.#$src = null;
 	}
 
-	get #output() { return (this.amount * this.rate).toFixed(2); }
+	get #output() {
+		let out = this.amount * this.rate;
+		return out <= 0.01 ? +out.toFixed(4) : +out.toFixed(3);
+	}
 	get #outMsg() { return this.dataset.outMsg.replace('{}', this.rate); }
 	get #to() { return this.#state.to; }
+
+	get pair() { return { to: this.#to, fiat: this.fiat, crypto: this.crypto } }
 
 	get rate() { return this.#state.rate; }
 	set rate(val) { this.#state.rate = +val; }
