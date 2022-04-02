@@ -11,16 +11,16 @@ data:
 <p>{{ page.data.intro }}</p>
 
 <form action="#select-offer" method="GET">
-	<swap-cash to="crypto" rate="1.1" data-out-msg="{{ page.data.out_msg }}">
+	<swap-x rate="1.1" data-out-msg="{{ page.data.out_msg }}">
 		<input name="amount" type="number" required slot="amount">
-		<select name="fiat" slot="fiat-select">
+		<select name="fiat" slot="from-select">
 			<option value="EUR">EUR</option>
 		</select>
-		<select name="crypto" slot="crypto-select">
+		<select name="crypto" slot="to-select">
 			<option value="AUSD">aUSD</option>
 			<option value="KSM">KSM</option>
 		</select>
-	</swap-cash>
+	</swap-x>
 	<input type="hidden" name="f" value="Europe+Paypal">
 	<button class="action" type="submit">Search</button>
 
