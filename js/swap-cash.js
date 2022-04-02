@@ -116,10 +116,21 @@ export class SwapCash extends HTMLElement {
 	#state = { to: 'crypto', amount: 0, fiat: '', crypto: '', rate: 1 };
 	#raf = null;
 
-	#onInput = ({originalTarget: input}) => {
+	#onInput = e => {
+		if (!e.isTrusted) return;
+		e.stopPropagation();
+
+		let input = e.originalTarget;
 		if (input instanceof HTMLInputElement) {
 			let amount = input === this.#$.output ? (+input.value / this.rate).toFixed(2) : input.value;
 			this.update({amount});
+			requestAnimationFrame(() => {
+				this.#$.amount.dispatchEvent(new Event('input', { bubbles: true }));
+			});
+		} else {
+			this[input.name] = input.value;
+			let pair = { to: this.#to, fliat: this.fiat, crypto: this.crypto };
+			this.dispatchEvent(new CustomEvent('pair-change', { detail: pair }));
 		}
 	};
 
@@ -147,12 +158,11 @@ export class SwapCash extends HTMLElement {
 
 	attributeChangedCallback(name, old, val) {
 		if (name == 'rate' && old !== val) {
-			this.rate = val;
-			this.update({rate: this.rate});
+			this.update({rate: val}, false);
 		}
 	}
 
-	update(state = null) {
+	update(state = null, canSkip = true) {
 		let updates = {};
 		if (state) {
 			for (let [name, val] of changes(this.#state, state)) {
@@ -165,7 +175,8 @@ export class SwapCash extends HTMLElement {
 			updates = this.#state; // force udpate all properties
 		}
 		cancelAnimationFrame(this.#raf);
-		this.#raf = requestAnimationFrame(() => this.#updateDOM(entries(updates)));
+		let raf = requestAnimationFrame(() => this.#updateDOM(entries(updates)));
+		if (canSkip) this.#raf = raf;
 	}
 
 	#updateDOM(updates) {
@@ -175,11 +186,13 @@ export class SwapCash extends HTMLElement {
 			case 'crypto': this.#$.crypto.value = val; break;
 			case 'rate': this.#$.outMsg.textContent = this.#outMsg; break;
 		}
-		this.#$.output.value = this.#output;
+		let out = this.#output, $out = this.#$.output;
+		if (+out != $out.value) $out.value = out;
 	}
 
 	get #output() { return (this.amount * this.rate).toFixed(2); }
-	get #outMsg() { return this.dataset.outMsg.replace('{}', this.rate) }
+	get #outMsg() { return this.dataset.outMsg.replace('{}', this.rate); }
+	get #to() { return this.#state.to; }
 
 	get rate() { return this.#state.rate; }
 	set rate(val) { this.#state.rate = +val; }

@@ -21,14 +21,13 @@ data:
 			<option value="KSM">KSM</option>
 		</select>
 	</swap-cash>
-	<input type="hidden" name="f" value="Europe,Paypal">
+	<input type="hidden" name="f" value="Europe+Paypal">
 	<button class="action" type="submit">Search</button>
 
 	<dialog id="notice" open>
 		<button type="button" onclick="parentElement.close()">✕</button>
 		{{ page.data.notice }}
 	</dialog>
-	
 </form>
 
 <ol id="select-offer">
