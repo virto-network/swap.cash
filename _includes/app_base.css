@@ -33,6 +33,12 @@ header {
 }
 li { list-style: none; }
 
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 :not(:defined) {
 	display: block;
 	background: rgba(255,255,255,0.3);

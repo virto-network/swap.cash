@@ -13,7 +13,7 @@ const changes = (o, n) => {
 const swapTpl = html`
 <style>
 :host {
-	--sw-size: 20px;
+	--sw-size: 22px;
 	--input-rad: 1rem;
 	display: flex; flex-direction: column;
 	position: relative;
@@ -40,18 +40,17 @@ const swapTpl = html`
 }
 
 #switch {
-	position: absolute;
-	height: var(--sw-size); width: var(--sw-size);
-	top: 50%; left: 50%;
-	margin-top: calc((-1*var(--sw-size) / 2) - 4px);
-	margin-left: calc((-1*var(--sw-size) / 2) - 4px);
-	border: none;
-	padding: 0;
 	background: var(--color-alt);
-	border: 4px solid var(--color-bg);
 	border-radius: 10px;
+	border: solid 3px var(--color-bg);
 	box-sizing: content-box;
 	display: flex; align-items: center; justify-content: center;
+	height: var(--sw-size); width: var(--sw-size);
+	margin-left: calc((-1*var(--sw-size) / 2) - 4px);
+	margin-top: calc((-1*var(--sw-size) / 2) - 4px);
+	padding: 0;
+	position: absolute;
+	top: 50%; left: 50%;
 }
 #switch svg { width: 50%; }
 
@@ -64,6 +63,11 @@ const swapTpl = html`
 	font-size: calc(1.1em + 1vw);
 	margin-right: 5px;
 	min-width: 0;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 ::slotted(select), select {
 	background: var(--color-bg);
@@ -101,7 +105,7 @@ const swapTpl = html`
 
 <button id="switch">
 	<svg width="8" height="8" fill="var(--color-accent)" viewBox="0 0 8 8">
-		<path d="m0.197 4.47c1.11 1.11 2.22 2.22 3.33 3.33 0.174 0.168 0.441 0.235 0.672 0.16 0.117-0.0357 0.223-0.102 0.306-0.192 1.1-1.1 2.2-2.21 3.31-3.31 0.165-0.166 0.23-0.422 0.166-0.647-0.0603-0.225-0.248-0.411-0.474-0.468-0.223-0.061-0.474 0.00523-0.638 0.168-0.733 0.735-1.47 1.47-2.2 2.21-3.42e-5 -1.69 6.85e-5 -3.38-5.14e-5 -5.07-7.95e-4 -0.233-0.135-0.459-0.338-0.572-0.201-0.116-0.463-0.115-0.663 0.00405-0.202 0.115-0.333 0.343-0.331 0.576v5.06c-0.735-0.737-1.47-1.48-2.2-2.21-0.165-0.162-0.418-0.225-0.64-0.161-0.245 0.0659-0.441 0.282-0.482 0.532-0.0382 0.212 0.0337 0.438 0.187 0.588z"/>
+		<path d="m0.2 4.5 3.3 3.3c0.17 0.17 0.44 0.24 0.67 0.16 0.12-0.036 0.22-0.1 0.31-0.19 1.1-1.1 2.2-2.2 3.3-3.3 0.16-0.17 0.23-0.42 0.17-0.65-0.06-0.22-0.25-0.41-0.47-0.47-0.22-0.061-0.47 0.0052-0.64 0.17-0.73 0.74-1.5 1.5-2.2 2.2-3.4e-5 -1.7 6.8e-5 -3.4-5.1e-5 -5.1-8e-4 -0.23-0.14-0.46-0.34-0.57-0.2-0.12-0.46-0.12-0.66 4e-3 -0.2 0.12-0.33 0.34-0.33 0.58v5.1c-0.74-0.74-1.5-1.5-2.2-2.2-0.16-0.16-0.42-0.22-0.64-0.16-0.24 0.066-0.44 0.28-0.48 0.53-0.038 0.21 0.034 0.44 0.19 0.59z"/>
 	</svg>
 </button>
 `
@@ -110,7 +114,7 @@ export class Swap extends HTMLElement {
 	static tag = 'swap-x';
 	static observedAttributes = ['rate'];
 
-	#dom;
+	#$$;
 	#$ = {};
 	#state = { amount: 0, from: '', to: '', rate: 1 };
 	#raf = null;
@@ -133,23 +137,35 @@ export class Swap extends HTMLElement {
 			this.dispatchEvent(new CustomEvent('pair-change', { detail: this.pair }));
 		}
 	};
+	#switchPair = ({target}) => {
+		let to = this.#$.to, from = this.#$.from;
+		this.#$.to = from; this.#$.from = to;
+		this.#$.from.setAttribute('slot', 'from-select');
+		this.#$.to.setAttribute('slot', 'to-select');
+		this.update({from: this.to, to: this.from, rate: 1 / this.rate});
+		this.#$.swBtn.firstElementChild
+			.animate([{ transform: 'rotateX(360deg)' }], 350);
+	};
 
 	constructor() {
 		super();
-		this.#dom = this.attachShadow({ mode: 'closed', delagatesFocus: true});
-		this.#dom.append(swapTpl.content.cloneNode(true))
+		this.#$$ = this.attachShadow({ mode: 'closed', delagatesFocus: true});
+		this.#$$.append(swapTpl.content.cloneNode(true))
 
-		let slot = this.#dom.querySelector('slot[name=amount]');
+		let slot = this.#$$.querySelector('slot[name=amount]');
 		this.#$.amount = slot.assignedElements()[0] ?? slot.firstElementChild;
-		this.#$.from   = this.#dom.querySelector('slot[name=from-select]').assignedElements()[0];
-		this.#$.to     = this.#dom.querySelector('slot[name=to-select]').assignedElements()[0];
-		this.#$.output = this.#dom.querySelector('#to input');
-		this.#$.outMsg = this.#dom.querySelector('#to+.message');
+		this.#$.from   = this.#$$.querySelector('slot[name=from-select]').assignedElements()[0];
+		this.#$.to     = this.#$$.querySelector('slot[name=to-select]').assignedElements()[0];
+		this.#$.output = this.#$$.querySelector('#to input');
+		this.#$.outMsg = this.#$$.querySelector('#to+.message');
+		this.#$.swBtn  = this.#$$.querySelector('#switch');
 	}
 
 	connectedCallback() {
-		this.#dom.addEventListener('input', this.#onInput);
-		Object.assign(this.#$.amount || {}, { min: 0.001, step: '.001', placeholder: '0.00' });
+		this.#$$.addEventListener('input', this.#onInput);
+		this.#$.swBtn.addEventListener('click', this.#switchPair);
+
+		Object.assign(this.#$.amount, { min: 0.001, step: '.001', placeholder: '0.00' });
 		this.amount = this.#$.amount?.value;
 		this.from = this.#$.from?.value;
 		this.to = this.#$.to?.value;
@@ -204,7 +220,7 @@ export class Swap extends HTMLElement {
 	get pair() { return { from: this.from, to: this.to } }
 
 	get rate() { return this.#state.rate; }
-	set rate(val = 1) { this.#state.rate = +val; }
+	set rate(val = 1) { this.#state.rate = +(+val).toFixed(3); }
 
 	get amount() { return this.#state.amount; }
 	set amount(val = 0) { this.#state.amount = Math.max(0, +val); }

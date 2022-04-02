@@ -1,5 +1,4 @@
 user-avatar { height: var(--touch-area); width: var(--touch-area); margin-left: auto; }
-swap-cash { height: calc(var(--size) * 0.4); }
 
 form button {
 	border-radius: 12px;
@@ -18,6 +17,7 @@ form button.action:active { box-shadow: 0 0 30px rgba(0,0,0,0.05) inset; }
 #select-offer:target { display: block; }
 
 dialog#notice {
+	align-items: center;
 	background-clip: padding-box;
 	background: var(--color-alt);
 	border-radius: 12px;
@@ -25,7 +25,6 @@ dialog#notice {
 	box-shadow: 0 0 0 0.6rem rgba(255, 255, 255, 0.4);
 	box-sizing: border-box;
 	color: var(--color-pink);
-	align-items: center;
 	margin: 3rem 0;
 	min-height: calc(var(--size) * .3);
 	padding: calc(var(--size) * .05);
@@ -33,6 +32,7 @@ dialog#notice {
 	width: 100%;
 }
 dialog#notice[open] { display: flex; }
+dialog#notice a { color: var(--color-pink); display: inline; }
 dialog#notice button {
 	background: none;
 	border: none;

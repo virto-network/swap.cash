@@ -1,11 +1,13 @@
 ---
-title: Swap Cash
+title: ｓｗａｐ｜ｃａｓｈ
 layout: app.liquid
 data:
   intro: |
     Buy your favorite cryptocurrency from local providers
   out_msg: aprox. to receive with an avg. rate of {}
-  notice: This demo is a work in progress
+  notice: |
+    This demo is a work in progress. Report any issues in our
+    <a href="https://github.com/virto-network/swap.cash/issues">GitHub</a>
 ---
 
 <p>{{ page.data.intro }}</p>
@@ -26,7 +28,7 @@ data:
 
 	<dialog id="notice" open>
 		<button type="button" onclick="parentElement.close()">✕</button>
-		{{ page.data.notice }}
+		<p>{{ page.data.notice }}</p>
 	</dialog>
 </form>
 
