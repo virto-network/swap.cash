@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" href="data:,">
+	<title>Virto Wallet</title>
+
+	<script src="module-workers-polyfill.min.js"></script>
+	<script type="module">
+	const { plugins } = await fetch('./plugins.json').then(r => r.json());
+	const w = new Worker('api.js', { type: 'module' }); // no FF support :(
+	w.postMessage({ meta: { action: 'register' }, data: plugins });
+	navigator.serviceWorker.register('sw.js');
+	</script>
+</head>
+<body>
+	
+</body>
+</html>
+

@@ -18,8 +18,10 @@
 <body>
 	<header>
 		{% include "swap_cash.svg" %}
-		<user-avatar></user-avatar>
 	</header>
+	<dialog>
+		<iframe name="wallet" src="{{ site.data.wallet_url }}"></iframe>
+	</dialog>
 	<main>{{ page.content }}</main>
 </body>
 

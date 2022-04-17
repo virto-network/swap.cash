@@ -1,0 +1,5 @@
+{
+	"plugins": [
+		{"name": "swap", "url": "./plugins/swap.js", "config": {"test": "test"} }
+	]
+}

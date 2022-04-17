@@ -1,3 +1,5 @@
 site:
   description: Decentralized on&off-ramps
   base_url: https://swap.cash
+  data:
+    wallet_url: http://localhost:1234 

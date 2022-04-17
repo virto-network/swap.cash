@@ -12,7 +12,7 @@ data:
 
 <p>{{ page.data.intro }}</p>
 
-<form action="#select-offer" method="GET">
+<form action="{{ site.data.wallet_url }}/swap/offers" method="GET" target="wallet">
 	<swap-x name="swap" rate="1.1" data-out-msg="{{ page.data.out_msg }}">
 		<input name="amount" type="number" required slot="amount">
 		<select name="fiat" slot="from-select">
