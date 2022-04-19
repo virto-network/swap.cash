@@ -9,9 +9,27 @@
 	<script src="module-workers-polyfill.min.js"></script>
 	<script type="module">
 	const { plugins } = await fetch('./plugins.json').then(r => r.json());
+	const chan = new MessageChannel();
+
 	const w = new Worker('api.js', { type: 'module' }); // no FF support :(
-	w.postMessage({ meta: { action: 'register' }, data: plugins });
-	navigator.serviceWorker.register('sw.js');
+	w.postMessage({ action: 'connect', data: chan.port1 }, [chan.port1]);
+	w.postMessage({ action: 'register', data: plugins });
+
+	const sw = await navigator.serviceWorker.register('sw.js');
+	navigator.serviceWorker.controller.postMessage({ port: chan.port2 }, [chan.port2]);
+
+	if (window != window.top) { // iframe
+		const reqId = new URL(location).searchParams.get('rid');
+		if (reqId) {
+			let res = await caches.match(reqId);
+			switch (res.headers.get('Content-Type')) {
+				case "application/json": res = await res.json(); break;
+				case "application/octet-stream": res = await res.arrayBuffer(); break;
+				default: res = await res.text(); break;
+			}
+			parent.postMessage(res, '*');
+		}
+	}
 	</script>
 </head>
 <body>
