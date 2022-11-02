@@ -3,11 +3,14 @@ title: ｓｗａｐ｜ｃａｓｈ
 layout: app.liquid
 data:
   intro: |
-    Buy your favorite cryptocurrency from local providers
+    Buy your favorite cryptocurrency directly from people in your area
   out_msg: aprox. to receive with an avg. rate of {}
   notice: |
-    This demo is a work in progress. Report any issues in our
-    <a href="https://github.com/virto-network/swap.cash/issues">GitHub</a>
+    SwapCash is a protocol for simple, decentralized, <i>peer to peer</i> exchange of fiat money 
+    and cryptocurrencies part of the <a href="https://virto.network">Virto Network</a>.<br>
+    <br>
+    This demo is a work in progress. For more information check our
+    <a href="explainer.html">explainer</a>.
 ---
 
 <p>{{ page.data.intro }}</p>
@@ -33,13 +36,13 @@ data:
 </form>
 
 <ol id="select-offer">
-	<swap-offer role="listitem" data-swaps="999" data-name="Ramen"
-			data-method="Paypal" data-where="DE" data-relative="+1.4%">
-		<output >0.9</output>
+	<swap-offer role="listitem" data-swaps="999" data-name="Ramen" data-method="Paypal" data-where="DE"
+		data-relative="+1.4%">
+		<output>0.9</output>
 	</swap-offer>
-	<swap-offer role="listitem" data-swaps="111" data-name="Milka"
-			data-method="SEPA" data-where="FR" data-relative="+2.0%">
-		<output >0.95</output>
+	<swap-offer role="listitem" data-swaps="111" data-name="Milka" data-method="SEPA" data-where="FR"
+		data-relative="+2.0%">
+		<output>0.95</output>
 	</swap-offer>
 </ol>
 
@@ -47,5 +50,3 @@ data:
 	<form action="#confirm-order">
 	</form>
 </dialog>
-
-

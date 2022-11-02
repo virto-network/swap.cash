@@ -16,13 +16,16 @@
 </head>
 
 <body>
-	<header>
-		{% include "swap_cash.svg" %}
-	</header>
 	<dialog>
 		<iframe name="wallet" src="{{ site.data.wallet_url }}"></iframe>
 	</dialog>
-	<main>{{ page.content }}</main>
+	<main>
+		<header>
+			{% include "swap_cash.svg" %}
+			<user-avatar></user-avatar>
+		</header>
+		{{ page.content }}
+	</main>
 </body>
 
 </html>

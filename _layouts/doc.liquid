@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="{{ site.description }}">
+	<link rel="icon" href="data:,">
+	<title>{{ page.title }}</title>
+	<meta name="theme-color" content="#3F3F8E">
+
+	<style>{% include "app_base.css" %}</style>
+	<style>
+	:root { --size: clamp(350px, 80vw, 1100px); }
+	article {
+		background: #fdfdff;
+		border-radius: 5px;
+		padding: 5vmin 4vmin;
+		line-height: 1.6em;
+		margin: 1rem auto;
+	}
+	h1, h2, h3 { font-family: 'DM Mono'; }
+	h1 { font-size: 1.6em; }
+	h2 { font-size: 1.3em; }
+	h3 { font-size: 1.15em; }
+	img { width: 100%; }
+
+	ul { padding: 0; display: flex; list-style: none; flex-wrap: wrap; }
+	article>ul:first-of-type li { flex: 1; margin: 1rem; text-align: center; }
+	li strong { display: block; font-size: 1.8em; color: var(--color-accent); }
+	#token-dist {
+		height: fit-content;
+		width: clamp(250px, 60vw, 480px);
+		overflow: visible;
+		display: block;
+		margin: 2rem auto;
+	}
+	#token-dist path { transition: transform 200ms; transform-origin: center; }
+	#token-dist[data-current=comm] #t-comm, 
+	#token-dist[data-current=team] #t-team, 
+	#token-dist[data-current=virto] #t-virto,
+	#token-dist[data-current=boot] #t-boot { transform: scale(1.02); }
+	#token-labels { flex-direction: column; cursor: default; width: fit-content; margin: auto; }
+	#token-labels li { margin: 0.2em 0; user-select: none; }
+	#token-labels li::before {
+		content: '';
+		display: inline-block;
+		margin-right: 8px;
+		width: 12px; height: 12px;
+		border-radius: 3px;
+	}
+	#token-labels em { color: lightgray; }
+	#token-labels:hover li { opacity: 0.7; }
+	#token-labels li:hover { opacity: 1; }
+
+	#token-labels>li:nth-of-type(1)::before { background: #595096; }
+	#token-labels>li:nth-of-type(2)::before { background: #d4adcf; }
+	#token-labels>li:nth-of-type(3)::before { background: #a6bdd3; }
+	#token-labels>li:nth-of-type(4)::before { background: #87ff65; }
+	#token-labels ul li:nth-of-type(1)::before { background: #6a60a9; }
+	#token-labels ul li:nth-of-type(2)::before { background: #766db0; }
+	#token-labels ul li:nth-of-type(3)::before { background: #837ab8; }
+	#token-labels ul li { margin-left: 1rem; }
+
+	</style>
+</head>
+
+<body>
+	<main>
+		<header>
+			<a href="/">{% include "swap_cash.svg" %}</a>
+		</header>
+		<article>{{ page.content }}</article>
+	</main>
+	<script type="module">
+		// token highlight
+		const tokenDist = document.getElementById('token-dist')
+		const labels = tokenDist.previousElementSibling
+		labels.id = 'token-labels'
+		const dist = ['comm', 'team', 'virto', 'boot']
+		labels.addEventListener('pointerleave', () => delete tokenDist.dataset.current)
+		labels.addEventListener('pointerover', e => {
+			let i = [...labels.children].indexOf(e.target.closest('#token-labels>li'))
+			tokenDist.dataset.current = dist[i]
+		})
+	</script>
+</body>
+
+</html>
